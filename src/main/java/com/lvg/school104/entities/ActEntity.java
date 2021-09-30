@@ -1,11 +1,14 @@
 package com.lvg.school104.entities;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.util.Arrays;
 
 /**
  * Created by Victor Levchenko LVG Corp. on 24.11.2020.
  */
 public class ActEntity {
+    private String actNumber;
     private String studentName;
     private LocalDate birthDate;
     private String studentAddress;
@@ -28,6 +31,14 @@ public class ActEntity {
     private String familyNeed;
     private String commissionConclusion;
     private LocalDate actDate;
+
+    public String getActNumber() {
+        return actNumber;
+    }
+
+    public void setActNumber(String actNumber) {
+        this.actNumber = actNumber;
+    }
 
     public String getStudentName() {
         return studentName;
@@ -205,30 +216,28 @@ public class ActEntity {
         this.actDate = actDate;
     }
 
-    @Override
-    public String toString() {
-        return "studentName " + studentName + "\t\t\t"+
-                "birthDate " + birthDate + "\t\t\t"+
-                "studentAddress " + studentAddress + "\t\t\t"+
-                "headCommission " +  headCommission + "\t\t\t"+
-                "firstCommissionMember " +  firstCommissionMember + "\t\t\t"+
-                "secondCommissionMember "  + secondCommissionMember + "\t\t\t"+
-                "thirdCommissionMember " + thirdCommissionMember + "\t\t\t"+
-                "actForRequest " + actForRequest + "\t\t\t"+
-                "forCause " + forCause + "\t\t\t"+
-                "childLivesWith " + childLivesWith + "\t\t\t"+
-                 "socialStatusOfFamily " + socialStatusOfFamily + "\t\t\t"+
-                 "flatRoomCount " + flatRoomCount + "\t\t\t"+
-                 "flatArea " + flatArea + "\t\t\t"+
-                 "cleanConditions " + cleanConditions + "\t\t\t"+
-                 "flatCleanState " + flatCleanState + "\t\t\t"+
-                 "presentFamilyDuringInspection " + presentFamilyDuringInspection + "\t\t\t"+
-                 "familyProfit " + familyProfit + "\t\t\t"+
-                 "childHas " + childHas + "\t\t\t"+
-                 "childHasSuchThings " + childHasSuchThings + "\t\t\t"+
-                 "familyNeed " + familyNeed + "\t\t\t"+
-                 "commissionConclusion " + commissionConclusion + "\t\t\t"+
-                 "actDate " + actDate + "\t\t\t";
+    private String getStringField(Field field){
+        try {
+            return field.getName()+": " + field.get(this) + "\t\t\t\t";
+        }
+        catch (Exception ex){
+            return "field "+field.getName()+" make exception: " + ex.getMessage();
+        }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder resulString = new StringBuilder();
+        Arrays.asList(this.getClass().getDeclaredFields()).forEach(field ->
+                resulString.append(getStringField(field)));
+        return resulString.toString();
+    }
+
+    public String getFormatNumber(int i) {
+        StringBuilder sb = new StringBuilder();
+        for (int j = 0; j<i; j++){
+            sb.append(0);
+        }
+        return sb+getActNumber();
+    }
 }

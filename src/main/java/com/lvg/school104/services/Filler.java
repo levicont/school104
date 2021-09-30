@@ -1,36 +1,41 @@
 package com.lvg.school104.services;
 
+import com.lvg.school104.entities.ActEntity;
+import com.lvg.school104.utils.Formatter;
+import com.lvg.school104.utils.OpenOfficeUtils;
+import com.lvg.school104.utils.PdfPrinter;
+import com.sun.star.beans.PropertyValue;
+import com.sun.star.frame.XComponentLoader;
+import com.sun.star.lang.XComponent;
+import com.sun.star.lang.XMultiComponentFactory;
+import com.sun.star.sheet.XSpreadsheet;
+import com.sun.star.sheet.XSpreadsheetDocument;
+import com.sun.star.sheet.XSpreadsheets;
+import com.sun.star.uno.UnoRuntime;
+
+import java.util.Objects;
+
+import static com.lvg.school104.utils.OpenOfficeUtils.*;
+
 public class Filler {
-    /*
-    private static final int PROTOCOL_VT_APPENDIX_ENTITIES_START_ROW = 76;
-    private static final int PROTOCOL_VT_APPENDIX_ENTITIES_FINAL_ROW = 198;
-    private static final int PROTOCOL_UT_APPENDIX_ENTITIES_START_ROW = 80;
-    private static final int PROTOCOL_UT_APPENDIX_ENTITIES_FINAL_ROW = 198;
-
-    private static final String PROTOCOL_VT_TEMPLATE_PATH = "file://"+ Objects.requireNonNull(Filler.class
-            .getClassLoader().getResource("templates/prot-VT-template.ods")).getPath();
-    private static final String PROTOCOL_UT_TEMPLATE_PATH = "file://"+ Objects.requireNonNull(Filler.class
-            .getClassLoader().getResource("templates/prot-UT-template.ods")).getPath();
-    private static final String PROTOCOL_VT_PAGE_STYLE_NAME = "protocol-VT";
-    private static final String PROTOCOL_UT_PAGE_STYLE_NAME = "protocol-UT";
 
 
+    private static final String ACT_TEMPLATE_PATH = "file://"+ Objects.requireNonNull(Filler.class
+            .getClassLoader().getResource("templates/act-template.ods")).getPath();
 
     private XSpreadsheetDocument xSpreadsheetDocument;
     private XComponent xComponent;
-    private TestReport testReport;
+    private ActEntity actEntity;
     private String currentTemplatePath;
-    private String currentPageStyleName;
-    private int currentAppendixEntityStartRow;
-    private int currentAppendixEntityFinalRow;
 
 
 
-    public Filler(TestReport testReport){
-        if (null == testReport)
-            throw new NullPointerException("Test report cannot be null!");
-        this.testReport = testReport;
-        initCurrentOptions(testReport);
+
+    public Filler(ActEntity actEntity){
+        if (null == actEntity)
+            throw new NullPointerException("Act entity cannot be null!");
+        this.actEntity = actEntity;
+        initCurrentOptions();
 
         PropertyValue[] loadProperties = getHiddenAsTemplateProperties();
         initXComponent(loadProperties);
@@ -38,19 +43,8 @@ public class Filler {
 
     }
 
-    private void initCurrentOptions(TestReport testReport){
-        if (testReport.getType() == TestReportType.VT){
-            currentTemplatePath = PROTOCOL_VT_TEMPLATE_PATH;
-            currentPageStyleName = PROTOCOL_VT_PAGE_STYLE_NAME;
-            currentAppendixEntityStartRow = PROTOCOL_VT_APPENDIX_ENTITIES_START_ROW;
-            currentAppendixEntityFinalRow = PROTOCOL_VT_APPENDIX_ENTITIES_FINAL_ROW;
-        }
-        if (testReport.getType() == TestReportType.UT){
-            currentTemplatePath = PROTOCOL_UT_TEMPLATE_PATH;
-            currentPageStyleName = PROTOCOL_UT_PAGE_STYLE_NAME;
-            currentAppendixEntityStartRow = PROTOCOL_UT_APPENDIX_ENTITIES_START_ROW;
-            currentAppendixEntityFinalRow = PROTOCOL_UT_APPENDIX_ENTITIES_FINAL_ROW;
-        }
+    private void initCurrentOptions(){
+            currentTemplatePath = ACT_TEMPLATE_PATH;
     }
 
 
@@ -80,17 +74,17 @@ public class Filler {
 
     public void print(){
 
-      PdfPrinter.print(testReport,xSpreadsheetDocument);
+      PdfPrinter.print(actEntity,xSpreadsheetDocument);
 
     }
 
     public void save(){
-        new Saver(testReport).save(xSpreadsheetDocument);
+        new Saver(actEntity).save(xSpreadsheetDocument);
 
     }
 
     public void exportPDF(){
-        new Saver(testReport).exportPDF(xSpreadsheetDocument);
+        new Saver(actEntity).exportPDF(xSpreadsheetDocument);
     }
 
 
@@ -103,132 +97,48 @@ public class Filler {
         }
     }
 
-    public void fillUpReport(){
-        if (testReport.getType() == TestReportType.VT)
-            fillUpVTReport();
-        if (testReport.getType() == TestReportType.UT)
-            fillUpUTReport();
-    }
-
-    private void fillUpUTReport(){
-        System.out.println("Starting filling UT report");
-        try {
-            XSpreadsheets xSpreadsheets = xSpreadsheetDocument.getSheets();
-            Object sheet = xSpreadsheets.getByName(xSpreadsheets.getElementNames()[0]);
-            XSpreadsheet xSpreadsheet = UnoRuntime.queryInterface(XSpreadsheet.class, sheet);
-            System.out.println("Number: "+ testReport.getNumber());
-            System.out.println("Date: "+ Formatter.formatDate(testReport.getDate()));
-            setCellTextByPosition(xSpreadsheet,5,9,testReport.getNumber());
-            setCellTextByPosition(xSpreadsheet,7,9,Formatter.formatDate(testReport.getDate()));
-            setCellTextByPosition(xSpreadsheet,3, 13, testReport.getWorkingDrawings());
-            setCellTextByPosition(xSpreadsheet,8, 17, testReport.getWelder());
-            setCellTextByPosition(xSpreadsheet,8, 18, testReport.getWelderEng());
-            setCellTextByPosition(xSpreadsheet,8, 20, testReport.getWelderMark());
-            setCellTextByPosition(xSpreadsheet,8, 21, testReport.getWelderMarkEng());
-
-            int appendixStartRow = currentAppendixEntityStartRow;
-            int appendixEntitiesCount = testReport.getAppendixEntities().size();
-            for(int i = 0; i < appendixEntitiesCount; i++ ){
-                TestReport.AppendixEntity appendixEntity = testReport.getAppendixEntities().get(i);
-                try {
-                    setCellTextByPosition(xSpreadsheet,0, appendixStartRow, (i+1)+"");
-                    setCellTextByPosition(xSpreadsheet,1, appendixStartRow, appendixEntity.getWorkingDrawings());
-                    setCellTextByPosition(xSpreadsheet,3, appendixStartRow, appendixEntity.getPosition());
-                    setCellTextByPosition(xSpreadsheet,4, appendixStartRow, appendixEntity.getPositionName());
-                    setCellTextByPosition(xSpreadsheet,6, appendixStartRow, appendixEntity.getAmount()+"");
-                    setCellTextByPosition(xSpreadsheet,7, appendixStartRow, appendixEntity.getCondition().toString());
-                    setCellTextByPosition(xSpreadsheet,8, appendixStartRow, appendixEntity.getComments());
-                    appendixStartRow++;
-                }catch (Exception ex){
-                    throw new RuntimeException(ex);
-                }
-            }
-
-            showTableRows(xSpreadsheet, currentAppendixEntityStartRow,appendixEntitiesCount);
-            hideTableRows(xSpreadsheet, currentAppendixEntityStartRow +appendixEntitiesCount, currentAppendixEntityFinalRow);
-            fillUpFooter(testReport);
-        }catch (Exception ex){
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private void fillUpVTReport(){
-        System.out.println("Starting filling VT report");
+    public void fillUpActReport(){
+        System.out.println("Starting filling act report");
         try {
             XSpreadsheets xSpreadsheets = this.xSpreadsheetDocument.getSheets();
             Object sheet = xSpreadsheets.getByName(xSpreadsheets.getElementNames()[0]);
             XSpreadsheet xSpreadsheet = UnoRuntime.queryInterface(XSpreadsheet.class, sheet);
-            System.out.println("Number: "+ testReport.getNumber());
-            System.out.println("Date: "+ Formatter.formatDate(testReport.getDate()));
-            setCellTextByPosition(xSpreadsheet,5,9,testReport.getNumber());
-            setCellTextByPosition(xSpreadsheet,7,9,Formatter.formatDate(testReport.getDate()));
-            setCellTextByPosition(xSpreadsheet,3, 13, testReport.getWorkingDrawings());
-            setCellTextByPosition(xSpreadsheet,8, 17, testReport.getWelder());
-            setCellTextByPosition(xSpreadsheet,8, 18, testReport.getWelderEng());
-            setCellTextByPosition(xSpreadsheet,8, 20, testReport.getWelderMark());
-            setCellTextByPosition(xSpreadsheet,8, 21, testReport.getWelderMarkEng());
+            System.out.println("Number: "+ actEntity.getActNumber());
+            System.out.println("Name: "+ actEntity.getStudentName());
 
-            int appendixStartRow = currentAppendixEntityStartRow;
-            int appendixEntitiesCount = testReport.getAppendixEntities().size();
-            for(int i = 0; i < appendixEntitiesCount; i++ ){
-                TestReport.AppendixEntity appendixEntity = testReport.getAppendixEntities().get(i);
-                try {
-                    setCellTextByPosition(xSpreadsheet,0, appendixStartRow, (i+1)+"");
-                    setCellTextByPosition(xSpreadsheet,1, appendixStartRow, appendixEntity.getWorkingDrawings());
-                    setCellTextByPosition(xSpreadsheet,3, appendixStartRow, appendixEntity.getPosition());
-                    setCellTextByPosition(xSpreadsheet,4, appendixStartRow, appendixEntity.getPositionName());
-                    setCellTextByPosition(xSpreadsheet,6, appendixStartRow, appendixEntity.getAmount()+"");
-                    setCellTextByPosition(xSpreadsheet,7, appendixStartRow, appendixEntity.getCondition().toString());
-                    setCellTextByPosition(xSpreadsheet,8, appendixStartRow, appendixEntity.getComments());
-                    appendixStartRow++;
-                }catch (Exception ex){
-                    throw new RuntimeException(ex);
-                }
-            }
+            setCellTextByPosition(xSpreadsheet,0,2,
+                    actEntity.getStudentName()+", "+Formatter.formatDate(actEntity.getBirthDate())+"р.");
+            setCellTextByPosition(xSpreadsheet,2,5, actEntity.getStudentAddress());
+            setCellTextByPosition(xSpreadsheet,1, 7, actEntity.getHeadCommission());
+            setCellTextByPosition(xSpreadsheet,1, 8, actEntity.getFirstCommissionMember());
+            setCellTextByPosition(xSpreadsheet,1, 9, actEntity.getSecondCommissionMember());
+            setCellTextByPosition(xSpreadsheet,1, 10, actEntity.getThirdCommissionMember());
+            setCellTextByPosition(xSpreadsheet,2, 12, actEntity.getActForRequest());
+            setCellTextByPosition(xSpreadsheet,1, 13, actEntity.getForCause());
+            setCellTextByPosition(xSpreadsheet,2, 15, actEntity.getChildLivesWith());
+            setCellTextByPosition(xSpreadsheet,2, 17, actEntity.getSocialStatusOfFamily());
+            setCellTextByPosition(xSpreadsheet,2, 18, actEntity.getFlatRoomCount());
+            setCellTextByPosition(xSpreadsheet,2, 19, actEntity.getFlatArea());
+            setCellTextByPosition(xSpreadsheet,2, 20, actEntity.getCleanConditions());
+            setCellTextByPosition(xSpreadsheet,2, 23, actEntity.getPresentFamilyDuringInspection());
+            setCellTextByPosition(xSpreadsheet,0, 26, actEntity.getFamilyProfit());
+            setCellTextByPosition(xSpreadsheet,0, 28, actEntity.getChildHas());
+            setCellTextByPosition(xSpreadsheet,0, 31, actEntity.getChildHasSuchThings());
+            setCellTextByPosition(xSpreadsheet,0, 34, actEntity.getFamilyNeed());
+            setCellTextByPosition(xSpreadsheet,0, 36, actEntity.getCommissionConclusion());
+            setCellTextByPosition(xSpreadsheet,1, 38, actEntity.getHeadCommission());
+            setCellTextByPosition(xSpreadsheet,1, 39, actEntity.getFirstCommissionMember());
+            setCellTextByPosition(xSpreadsheet,1, 40, actEntity.getSecondCommissionMember());
+            setCellTextByPosition(xSpreadsheet,1, 41, actEntity.getThirdCommissionMember());
+            setCellTextByPosition(xSpreadsheet,5, 43, Formatter.formatDate(actEntity.getActDate())+"р.");
 
-            showTableRows(xSpreadsheet, currentAppendixEntityStartRow,appendixEntitiesCount);
-            hideTableRows(xSpreadsheet, currentAppendixEntityStartRow +appendixEntitiesCount, currentAppendixEntityFinalRow);
-            fillUpFooter(testReport);
         }catch (Exception ex){
             throw new RuntimeException(ex);
         }
     }
 
-    private void fillUpFooter(TestReport testReport){
-        XStyleFamiliesSupplier xStyleFamiliesSupplier = UnoRuntime.queryInterface(XStyleFamiliesSupplier.class,
-                this.xSpreadsheetDocument);
-
-        try {
-            Object pageStyle = xStyleFamiliesSupplier.getStyleFamilies().getByName("PageStyles");
-            XNameContainer xNameContainer = UnoRuntime.queryInterface(XNameContainer.class,
-                    pageStyle);
-            XPropertySet xPropertySet = UnoRuntime.queryInterface(XPropertySet.class,
-                    xNameContainer.getByName(currentPageStyleName));
-
-            XHeaderFooterContent rightPageFooterContent = UnoRuntime.queryInterface(XHeaderFooterContent.class,
-                    xPropertySet.getPropertyValue("RightPageFooterContent"));
-            rightPageFooterContent.getLeftText().setString(getLeftFooterText(testReport));
-            xPropertySet.setPropertyValue("RightPageFooterContent",rightPageFooterContent);
 
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
 
-    private String getLeftFooterText(TestReport testReport){
-        String number = testReport.getNumber();
-        String date = Formatter.formatDate(testReport.getDate());
-        if (testReport.getType()==TestReportType.VT)
-            return "Протокол VT № "+number+" от "+date+"\n" +
-                    "Report VT #"+number+" of "+date;
-        if (testReport.getType()==TestReportType.UT)
-            return "Протокол UT № "+number+" от "+date+"\n" +
-                "Report UT #"+number+" of "+date;
-        throw new IllegalArgumentException("Test report type not supported");
-    }
-
-      */
 
 }

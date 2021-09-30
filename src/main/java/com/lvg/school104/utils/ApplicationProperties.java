@@ -13,8 +13,8 @@ public class ApplicationProperties {
     public static final Boolean IS_WINDOWS;
 
     static {
-        APP_PROPERTIES_URL = Objects.requireNonNull(ApplicationProperties.class
-                .getClassLoader().getResource("app.properties").getPath());
+        APP_PROPERTIES_URL = Objects.requireNonNull(Objects.requireNonNull(ApplicationProperties.class
+                .getClassLoader().getResource("app.properties")).getPath());
         if (System.getProperty("os.name").equalsIgnoreCase("Linux")){
             OPEN_OFFICE_PATH_PROPERTY_NAME = "OpenOfficeLinuxPath";
             IS_WINDOWS = Boolean.FALSE;

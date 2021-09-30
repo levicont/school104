@@ -1,8 +1,23 @@
 package com.lvg.school104.utils;
 
+import com.lvg.school104.entities.ActEntity;
+import com.sun.star.beans.PropertyValue;
+import com.sun.star.sheet.XSpreadsheetDocument;
+import com.sun.star.uno.UnoRuntime;
+import com.sun.star.view.XPrintable;
+
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static com.lvg.school104.utils.ApplicationProperties.*;
+import static com.lvg.school104.utils.OpenOfficeUtils.getFileNameAccordingOS;
+
 public class PdfPrinter {
-   /*
-    private static PropertyValue[] getPdfPrinterOptions(){
+
+    private static PropertyValue[] getPdfPrinterOptions() {
         PropertyValue[] properties;
         properties = new PropertyValue[1];
         properties[0] = new PropertyValue();
@@ -12,8 +27,8 @@ public class PdfPrinter {
         return properties;
     }
 
-    public static void print(TestReport testReport, XSpreadsheetDocument xSpreadsheetDocument){
-        try{
+    public static void print(ActEntity actReport, XSpreadsheetDocument xSpreadsheetDocument) {
+        try {
             XPrintable xPrintable = UnoRuntime.queryInterface(XPrintable.class,
                     xSpreadsheetDocument);
 
@@ -23,52 +38,39 @@ public class PdfPrinter {
 
             propertyOptions[0] = new PropertyValue();
             propertyOptions[0].Name = "FileName";
-            propertyOptions[0].Value = OPEN_OFFICE_FILE_PATH_PREFIX+getPdfFileName(testReport);
+            propertyOptions[0].Value = OPEN_OFFICE_FILE_PATH_PREFIX + getPdfFileName(actReport);
 
             xPrintable.print(propertyOptions);
-            System.out.println("Printed at: "+propertyOptions[0].Value);
-        }catch(Exception ex){
+            System.out.println("Printed at: " + propertyOptions[0].Value);
+        } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    private static String getPdfFileName(TestReport testReport){
+    private static String getPdfFileName(ActEntity actReport) {
         String pathToPdfDir;
-        if (testReport.getType() == TestReportType.VT) {
-            pathToPdfDir = getProperty(USER_HOME_PATH_PROPERTY_NAME)+getProperty("ProtocolVTPdfPath");
-            checkStoreDirectory(pathToPdfDir);
-            return  getFileNameAccordingOS(pathToPdfDir+
-                    getProperty("ProtocolVTPdfFilePrefix") +
-                    testReport.getFormatNumber(4).replace('/', '-') + "_" +
-                    Formatter.formatDate(testReport.getDate()).replace('.', '-') +
-                    getProperty("PdfFileSuffix"));
-        }
-        if (testReport.getType() == TestReportType.UT){
-            pathToPdfDir = getProperty(USER_HOME_PATH_PROPERTY_NAME)+getProperty("ProtocolUTPdfPath");
-            checkStoreDirectory(pathToPdfDir);
-            return  getFileNameAccordingOS(pathToPdfDir+
-                    getProperty("ProtocolUTPdfFilePrefix")+
-                    testReport.getFormatNumber(4).replace('/','-')+"_"+
-                    Formatter.formatDate(testReport.getDate()).replace('.','-')+
-                    getProperty("PdfFileSuffix"));
-        }
-        throw new IllegalArgumentException("Test report type not supported");
+        pathToPdfDir = getProperty(USER_HOME_PATH_PROPERTY_NAME) + getProperty("ActReportPdfPath");
+        checkStoreDirectory(pathToPdfDir);
+        return getFileNameAccordingOS(pathToPdfDir +
+                getProperty("ActReportPdfFilePrefix") +
+                actReport.getFormatNumber(4).replace('/', '-') + "_" +
+                Formatter.formatDate(actReport.getActDate()).replace('.', '-') +
+                getProperty("PdfFileSuffix"));
     }
 
-    private static void checkStoreDirectory(String path){
-
+    private static void checkStoreDirectory(String path) {
         Path pathDir = Paths.get(path);
         if (Files.exists(pathDir))
             return;
         try {
             Files.createDirectories(pathDir);
-        }catch (FileAlreadyExistsException ex){
-            System.out.println("Directory: "+path+"already exists");
-        }catch (IOException ex){
+        } catch (FileAlreadyExistsException ex) {
+            System.out.println("Directory: " + path + "already exists");
+        } catch (IOException ex) {
             ex.printStackTrace();
             System.exit(1);
         }
     }
 
-     */
+
 }

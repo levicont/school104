@@ -32,7 +32,7 @@ public class DataExtractor {
             Object sheet = xSpreadsheets.getByName(xSpreadsheets.getElementNames()[0]);
             XSpreadsheet xSpreadsheet = UnoRuntime.queryInterface(XSpreadsheet.class, sheet);
 
-            int startRow = 2;
+            int startRow = 1;
             int emptyRowsCount = 0;
 
             while(emptyRowsCount <2){
@@ -45,7 +45,7 @@ public class DataExtractor {
                     emptyRowsCount=0;
                 }
             }
-            System.out.println(actEntityList.size()+" journal entities has found.");
+            System.out.println(actEntityList.size()+" act entities has found.");
             return actEntityList;
         }catch (Exception ex){
             throw new RuntimeException(ex);
@@ -59,28 +59,29 @@ public class DataExtractor {
     private static ActEntity getJournalWeldingEntityFromTableRow(int row, XSpreadsheet xSpreadsheet){
         ActEntity entity = new ActEntity();
         try {
-            entity.setStudentName(getCellTextByPosition(xSpreadsheet,0,row));
-            entity.setBirthDate(getLocalDateFromDoubleValue(xSpreadsheet.getCellByPosition(1,row).getValue()));
-            entity.setStudentAddress(getCellTextByPosition(xSpreadsheet, 2, row));
-            entity.setHeadCommission(getCellTextByPosition(xSpreadsheet,3, row));
-            entity.setFirstCommissionMember(getCellTextByPosition(xSpreadsheet,4, row));
-            entity.setSecondCommissionMember(getCellTextByPosition(xSpreadsheet,5, row));
-            entity.setThirdCommissionMember(getCellTextByPosition(xSpreadsheet,6, row));
-            entity.setActForRequest(getCellTextByPosition(xSpreadsheet,7, row));
-            entity.setForCause(getCellTextByPosition(xSpreadsheet,8, row));
-            entity.setChildLivesWith(getCellTextByPosition(xSpreadsheet,9, row));
-            entity.setSocialStatusOfFamily(getCellTextByPosition(xSpreadsheet,10, row));
-            entity.setFlatRoomCount(getCellTextByPosition(xSpreadsheet,11, row));
-            entity.setFlatArea(getCellTextByPosition(xSpreadsheet,12, row));
-            entity.setCleanConditions(getCellTextByPosition(xSpreadsheet,13, row));
-            entity.setFlatCleanState(getCellTextByPosition(xSpreadsheet,14, row));
-            entity.setPresentFamilyDuringInspection(getCellTextByPosition(xSpreadsheet,15, row));
-            entity.setFamilyProfit(getCellTextByPosition(xSpreadsheet,16, row));
-            entity.setChildHas(getCellTextByPosition(xSpreadsheet,17, row));
-            entity.setChildHasSuchThings(getCellTextByPosition(xSpreadsheet,18, row));
-            entity.setFamilyNeed(getCellTextByPosition(xSpreadsheet,19, row));
-            entity.setCommissionConclusion(getCellTextByPosition(xSpreadsheet,20, row));
-            entity.setActDate(getLocalDateFromDoubleValue(xSpreadsheet.getCellByPosition(21,row).getValue()));
+            entity.setActNumber(getCellTextByPosition(xSpreadsheet,0,row));
+            entity.setStudentName(getCellTextByPosition(xSpreadsheet,1,row));
+            entity.setBirthDate(getLocalDateFromDoubleValue(xSpreadsheet.getCellByPosition(2,row).getValue()));
+            entity.setStudentAddress(getCellTextByPosition(xSpreadsheet, 3, row));
+            entity.setHeadCommission(getCellTextByPosition(xSpreadsheet,4, row));
+            entity.setFirstCommissionMember(getCellTextByPosition(xSpreadsheet,5, row));
+            entity.setSecondCommissionMember(getCellTextByPosition(xSpreadsheet,6, row));
+            entity.setThirdCommissionMember(getCellTextByPosition(xSpreadsheet,7, row));
+            entity.setActForRequest(getCellTextByPosition(xSpreadsheet,8, row));
+            entity.setForCause(getCellTextByPosition(xSpreadsheet,9, row));
+            entity.setChildLivesWith(getCellTextByPosition(xSpreadsheet,10, row));
+            entity.setSocialStatusOfFamily(getCellTextByPosition(xSpreadsheet,11, row));
+            entity.setFlatRoomCount(getCellTextByPosition(xSpreadsheet,12, row));
+            entity.setFlatArea(getCellTextByPosition(xSpreadsheet,13, row));
+            entity.setCleanConditions(getCellTextByPosition(xSpreadsheet,14, row));
+            entity.setFlatCleanState(getCellTextByPosition(xSpreadsheet,15, row));
+            entity.setPresentFamilyDuringInspection(getCellTextByPosition(xSpreadsheet,16, row));
+            entity.setFamilyProfit(getCellTextByPosition(xSpreadsheet,17, row));
+            entity.setChildHas(getCellTextByPosition(xSpreadsheet,18, row));
+            entity.setChildHasSuchThings(getCellTextByPosition(xSpreadsheet,19, row));
+            entity.setFamilyNeed(getCellTextByPosition(xSpreadsheet,20, row));
+            entity.setCommissionConclusion(getCellTextByPosition(xSpreadsheet,21, row));
+            entity.setActDate(getLocalDateFromDoubleValue(xSpreadsheet.getCellByPosition(22,row).getValue()));
 
 
         }catch(Exception ex){
@@ -89,11 +90,7 @@ public class DataExtractor {
         return entity;
     }
 
-    public static void main(String[] args) {
-        getActEntities().forEach(actEntity -> {
-            System.out.println(actEntity.toString());
-        });
-    }
+
 
 
 }
